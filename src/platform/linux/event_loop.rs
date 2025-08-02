@@ -26,19 +26,19 @@ impl<W: WindowHandler> EventLoop<W> {
 
     pub fn run(mut self) {
         while self.event_loop_running {
-            let xcb_fd = self.handler.window().inner.connection.stream().as_fd();
+            let xcb_fd = self.handler.window().inner.connection.as_fd();
             let mut poll_fd = [PollFd::new(xcb_fd, PollFlags::POLLIN)];
             poll(&mut poll_fd, 5 as u16).unwrap();
             poll_fd[0].revents();
 
-            for event in std::iter::from_fn(|| {
-                self.handler
-                    .window()
-                    .inner
-                    .connection
-                    .poll_for_event()
-                    .unwrap()
-            }) {
+            while let Some(event) = self
+                .handler
+                .window()
+                .inner
+                .connection
+                .poll_for_event()
+                .unwrap()
+            {
                 match event {
                     x11rb::protocol::Event::ClientMessage(client_message_event)
                         if client_message_event.format == 32
@@ -47,6 +47,13 @@ impl<W: WindowHandler> EventLoop<W> {
                     {
                         self.event_loop_running = false;
                         println!("closing now!");
+                    }
+                    x11rb::protocol::Event::MotionNotify(motion_notify_event) => {
+                        self.handler
+                            .on_event(crate::Event::Mouse(crate::MouseEvent::Moved {
+                                x: motion_notify_event.event_x.unsigned_abs(),
+                                y: motion_notify_event.event_y.unsigned_abs(),
+                            }));
                     }
 
                     event => println!("{event:?}"),

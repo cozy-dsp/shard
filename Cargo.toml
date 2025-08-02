@@ -9,4 +9,7 @@ raw-window-handle = "0.6"
 
 [target.'cfg(target_os="linux")'.dependencies]
 nix = { version = "0.30.1", features = ["poll"] }
-x11rb = "0.13.1"
+x11rb = {version = "0.13.1", features = ["allow-unsafe-code", "resource_manager"]}
+
+[dev-dependencies]
+softbuffer = "0.4.6"
