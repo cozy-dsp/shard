@@ -1,0 +1,12 @@
+[package]
+name = "shard"
+description = "because writing this feels like shoving a shard of glass into my eye"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+raw-window-handle = "0.6"
+
+[target.'cfg(target_os="linux")'.dependencies]
+nix = { version = "0.30.1", features = ["poll"] }
+x11rb = "0.13.1"
